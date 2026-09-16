@@ -359,11 +359,11 @@ function useApp() {
 function PageHeader({ title, subtitle, action }) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-6 gap-3">
-      <div>
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{title}</h1>
+      <div className="min-w-0">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 break-words">{title}</h1>
         <p className="text-sm text-gray-500 mt-1">{subtitle}</p>
       </div>
-      {action}
+      {action && <div className="w-full sm:w-auto [&>button]:w-full sm:[&>button]:w-auto [&>button]:justify-center">{action}</div>}
     </div>
   );
 }
@@ -433,13 +433,15 @@ function Dropdown({ label, value, onChange, options }) {
   );
 }
 
-function StatusSelect({ value, onChange }) {
+function StatusSelect({ value, onChange, compact }) {
   return (
-    <div className="relative inline-block">
+    <div className={`relative inline-block min-w-0 ${compact ? "flex-1" : ""}`}>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`appearance-none text-xs font-medium pl-2.5 pr-6 py-1 rounded-full outline-none cursor-pointer ${TAG_COLORS[STATUS_COLOR[value]]}`}
+        className={`appearance-none text-xs font-medium pl-2.5 pr-6 py-1 rounded-full outline-none cursor-pointer w-full ${
+          compact ? "max-w-[132px] truncate" : ""
+        } ${TAG_COLORS[STATUS_COLOR[value]]}`}
       >
         {STATUS_FLOW.map((s) => (
           <option key={s} value={s}>
@@ -455,7 +457,10 @@ function StatusSelect({ value, onChange }) {
 function Toast({ message }) {
   if (!message) return null;
   return (
-    <div className="fixed bottom-5 right-5 bg-gray-900 text-white text-sm font-medium px-4 py-2.5 rounded-lg shadow-lg z-[60] animate-[fadeIn_.15s_ease-out]">
+    <div
+      className="fixed right-4 sm:right-5 left-4 sm:left-auto bg-gray-900 text-white text-sm font-medium px-4 py-2.5 rounded-lg shadow-lg z-[60] animate-[fadeIn_.15s_ease-out] text-center sm:text-left"
+      style={{ bottom: "calc(1.25rem + env(safe-area-inset-bottom, 0px))" }}
+    >
       {message}
     </div>
   );
@@ -492,7 +497,7 @@ function Modal({ title, onClose, children, wide }) {
 
 function Field({ label, children, span }) {
   return (
-    <label className={`block mb-3.5 ${span ? "col-span-2" : ""}`}>
+    <label className={`block mb-3.5 min-w-0 ${span ? "sm:col-span-2" : ""}`}>
       <span className="block text-xs font-medium text-gray-500 mb-1">{label}</span>
       {children}
     </label>
@@ -1834,19 +1839,19 @@ function KanbanPage() {
                         <div className="mt-2">
                           <Tag color={prazo.color}>{prazo.label}</Tag>
                         </div>
-                        <div className="flex items-center justify-between mt-2.5">
+                        <div className="flex items-center justify-between gap-1 mt-2.5">
                           <button
                             disabled={idx === 0}
                             onClick={() => setPedidoStatus(p.id, STATUS_FLOW[idx - 1])}
-                            className="w-6 h-6 rounded-md border border-gray-200 flex items-center justify-center disabled:opacity-30 hover:bg-gray-50"
+                            className="w-6 h-6 shrink-0 rounded-md border border-gray-200 flex items-center justify-center disabled:opacity-30 hover:bg-gray-50"
                           >
                             <ChevronLeft size={12} />
                           </button>
-                          <StatusSelect value={p.status} onChange={(v) => setPedidoStatus(p.id, v)} />
+                          <StatusSelect compact value={p.status} onChange={(v) => setPedidoStatus(p.id, v)} />
                           <button
                             disabled={idx === STATUS_FLOW.length - 1}
                             onClick={() => setPedidoStatus(p.id, STATUS_FLOW[idx + 1])}
-                            className="w-6 h-6 rounded-md border border-gray-200 flex items-center justify-center disabled:opacity-30 hover:bg-gray-50"
+                            className="w-6 h-6 shrink-0 rounded-md border border-gray-200 flex items-center justify-center disabled:opacity-30 hover:bg-gray-50"
                           >
                             <ChevronRight size={12} />
                           </button>
@@ -2853,7 +2858,11 @@ export default function GraficaDashboard() {
       `}</style>
       <div className="flex min-h-screen bg-white text-gray-900" style={{ fontFamily: "Inter, system-ui, sans-serif" }}>
         {/* Topo mobile */}
-        <div className="md:hidden fixed top-0 inset-x-0 h-14 border-b border-gray-100 bg-white z-30 flex items-center justify-between px-4 no-print">
+        <div
+          className="md:hidden fixed top-0 inset-x-0 h-14 border-b border-gray-100 bg-white z-30 flex items-center justify-between px-4 no-print"
+          style={{ paddingTop: "env(safe-area-inset-top, 0px)", height: "calc(3.5rem + env(safe-area-inset-top, 0px))" }}
+        >
+
           <button
             onClick={() => setMobileNavOpen(true)}
             className="w-9 h-9 -ml-1.5 rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-50"
@@ -2940,11 +2949,16 @@ export default function GraficaDashboard() {
         </aside>
 
         {/* Main */}
-        <main className="flex-1 w-full min-w-0 p-4 sm:p-6 md:p-8 pt-20 md:pt-8 overflow-x-hidden">{renderPage()}</main>
+        <main className="flex-1 w-full min-w-0 p-4 sm:p-6 md:p-8 pt-[calc(5rem+env(safe-area-inset-top,0px))] md:pt-8 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] overflow-x-hidden">
+          {renderPage()}
+        </main>
       </div>
       <Toast message={toast} />
       {saveError && (
-        <div className="fixed bottom-5 left-5 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-medium px-3.5 py-2 rounded-lg shadow z-[60]">
+        <div
+          className="fixed left-4 sm:left-5 right-4 sm:right-auto bg-amber-50 border border-amber-200 text-amber-700 text-xs font-medium px-3.5 py-2 rounded-lg shadow z-[60]"
+          style={{ bottom: "calc(1.25rem + env(safe-area-inset-bottom, 0px))" }}
+        >
           Não foi possível salvar as últimas alterações neste navegador.
         </div>
       )}
